@@ -53,5 +53,6 @@ class MakeServiceCommand extends MakeCommand
 
         $this->addOption('controller', null, InputOption::VALUE_NONE, 'Generate the controller file with the same name');
         $this->addOption('model', null, InputOption::VALUE_NONE, 'Generate the model file with the same name');
+        $this->addOption('validate', null, InputOption::VALUE_NONE, 'Generate the validate file with the same name');
     }
 }

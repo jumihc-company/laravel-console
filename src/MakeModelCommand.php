@@ -337,6 +337,7 @@ class MakeModelCommand extends MakeCommand
 
         $this->addOption('controller', null, InputOption::VALUE_NONE, 'Generate the controller file with the same name');
         $this->addOption('service', null, InputOption::VALUE_NONE, 'Generate the service file with the same name');
+        $this->addOption('validate', null, InputOption::VALUE_NONE, 'Generate the validate file with the same name');
 
         $this->addOption('connection', 'c', InputOption::VALUE_OPTIONAL, 'Specify database links', 'mysql');
         $this->addOption('table', 't', InputOption::VALUE_IS_ARRAY | InputOption::VALUE_REQUIRED, 'Exclude table names');

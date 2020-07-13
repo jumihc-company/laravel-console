@@ -1,36 +1,32 @@
 <?php
 /**
  * User: YL
- * Date: 2020/07/01
+ * Date: 2020/07/13
  */
 
 namespace Jmhc\Console;
 
 use Symfony\Component\Console\Input\InputOption;
 
-/**
- * 生成控制器
- * @package Jmhc\Restful\Console\Commands
- */
-class MakeControllerCommand extends MakeCommand
+class MakeValidateCommand extends MakeCommand
 {
     /**
      * 命令名称
      * @var string
      */
-    protected $name = 'jmhc-api:make-controller';
+    protected $name = 'jmhc-api:make-validate';
 
     /**
      * 实体名称
      * @var string
      */
-    protected $entityName = 'Controller';
+    protected $entityName = 'Validate';
 
     /**
      * 模板路径
      * @var string
      */
-    protected $stubPath = __DIR__ . '/stubs/controller.stub';
+    protected $stubPath = __DIR__ . '/stubs/validate.stub';
 
     /**
      * 设置参数、选项
@@ -40,8 +36,8 @@ class MakeControllerCommand extends MakeCommand
         parent::setArgumentOption();
 
         // 引入、继承类
-        $this->uses = PHP_EOL . 'use ' . $this->optionControllerExtendsCustom . ';';
-        $this->extends = ' extends ' . class_basename($this->optionControllerExtendsCustom);
+        $this->uses = PHP_EOL . 'use ' . $this->optionValidateExtendsCustom . ';';
+        $this->extends = ' extends ' . class_basename($this->optionValidateExtendsCustom);
     }
 
     /**
@@ -51,8 +47,8 @@ class MakeControllerCommand extends MakeCommand
     {
         parent::configure();
 
+        $this->addOption('controller', null, InputOption::VALUE_NONE, 'Generate the controller file with the same name');
         $this->addOption('model', null, InputOption::VALUE_NONE, 'Generate the model file with the same name');
         $this->addOption('service', null, InputOption::VALUE_NONE, 'Generate the service file with the same name');
-        $this->addOption('validate', null, InputOption::VALUE_NONE, 'Generate the validate file with the same name');
     }
 }

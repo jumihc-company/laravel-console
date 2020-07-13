@@ -146,6 +146,12 @@ abstract class MakeCommand extends Command
      */
     protected $optionServiceExtendsCustom;
 
+    /**
+     * 选项 validate-extends-custom
+     * @var string
+     */
+    protected $optionValidateExtendsCustom;
+
     public function __construct()
     {
         $this->description = sprintf(
@@ -291,6 +297,7 @@ abstract class MakeCommand extends Command
             '--controller-extends-custom' => $this->optionControllerExtendsCustom,
             '--model-extends-custom' => $this->optionModelExtendsCustom,
             '--service-extends-custom' => $this->optionServiceExtendsCustom,
+            '--validate-extends-custom' => $this->optionValidateExtendsCustom,
         ];
         // 保存路径
         $saveDir = $this->getSaveDir();
@@ -323,6 +330,13 @@ abstract class MakeCommand extends Command
             $_dir = sprintf($dirFormat, 'Services');
             $arguments['--dir'] = $_dir;
             $this->call('jmhc-api:make-service', $arguments);
+        }
+
+        // 创建验证器
+        if ($this->hasOption('validate') && $this->option('validate')) {
+            $_dir = sprintf($dirFormat, 'Validates');
+            $arguments['--dir'] = $_dir;
+            $this->call('jmhc-api:make-validate', $arguments);
         }
 
         // 创建迁移
@@ -366,6 +380,7 @@ abstract class MakeCommand extends Command
         $this->optionControllerExtendsCustom = $this->getCommandClass($this->option('controller-extends-custom'));
         $this->optionModelExtendsCustom = $this->getCommandClass($this->option('model-extends-custom'));
         $this->optionServiceExtendsCustom = $this->getCommandClass($this->option('service-extends-custom'));
+        $this->optionValidateExtendsCustom = $this->getCommandClass($this->option('validate-extends-custom'));
     }
 
     /**
@@ -386,5 +401,6 @@ abstract class MakeCommand extends Command
         $this->addOption('controller-extends-custom', null, InputOption::VALUE_REQUIRED, 'The custom controller inherits its parent class', 'Jmhc\Restful\Controllers\BaseController');
         $this->addOption('model-extends-custom', null, InputOption::VALUE_REQUIRED, 'The custom model inherits its parent class', 'Jmhc\Restful\Models\BaseModel');
         $this->addOption('service-extends-custom', null, InputOption::VALUE_REQUIRED, 'The custom service inherits its parent class', 'Jmhc\Restful\Services\BaseService');
+        $this->addOption('validate-extends-custom', null, InputOption::VALUE_REQUIRED, 'The custom validate inherits its parent class', 'Jmhc\Restful\Validates\BaseValidate');
     }
 }

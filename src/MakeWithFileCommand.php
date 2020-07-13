@@ -70,6 +70,18 @@ class MakeWithFileCommand extends Command
     protected $isForceController;
 
     /**
+     * 选项 model
+     * @var string
+     */
+    protected $optionModel;
+
+    /**
+     * 是否覆盖模型
+     * @var bool
+     */
+    protected $isForceModel;
+
+    /**
      * 选项 service
      * @var string
      */
@@ -82,16 +94,16 @@ class MakeWithFileCommand extends Command
     protected $isForceService;
 
     /**
-     * 选项 model
+     * 选项 validate
      * @var string
      */
-    protected $optionModel;
+    protected $optionValidate;
 
     /**
-     * 是否覆盖模型
+     * 是否覆盖验证器
      * @var bool
      */
-    protected $isForceModel;
+    protected $isForceValidate;
 
     /**
      * 选项 migration
@@ -134,6 +146,12 @@ class MakeWithFileCommand extends Command
      * @var string
      */
     protected $optionServiceExtendsCustom;
+
+    /**
+     * 选项 validate-extends-custom
+     * @var string
+     */
+    protected $optionValidateExtendsCustom;
 
     public function handle()
     {
@@ -192,6 +210,7 @@ class MakeWithFileCommand extends Command
             '--controller-extends-custom' => $this->optionControllerExtendsCustom,
             '--model-extends-custom' => $this->optionModelExtendsCustom,
             '--service-extends-custom' => $this->optionServiceExtendsCustom,
+            '--validate-extends-custom' => $this->optionValidateExtendsCustom,
         ];
 
         // 创建控制器
@@ -213,6 +232,13 @@ class MakeWithFileCommand extends Command
             $arguments['--force'] = $this->isForceService;
             $arguments['--dir'] = $this->optionDir . 'Services/';
             $this->call('jmhc-api:make-service', $arguments);
+        }
+
+        // 创建验证器
+        if ($this->optionValidate) {
+            $arguments['--force'] = $this->isForceValidate;
+            $arguments['--dir'] = $this->optionDir . 'Validates/';
+            $this->call('jmhc-api:make-validate', $arguments);
         }
 
         // 创建迁移
@@ -248,10 +274,12 @@ class MakeWithFileCommand extends Command
         $this->optionSuffix = $this->option('suffix');
         $this->optionController = $this->option('controller');
         $this->isForceController = $this->option('force') || $this->option('force-controller');
-        $this->optionService = $this->option('service');
-        $this->isForceService = $this->option('force') || $this->option('force-service');
         $this->optionModel = $this->option('model');
         $this->isForceModel = $this->option('force') || $this->option('force-model');
+        $this->optionService = $this->option('service');
+        $this->isForceService = $this->option('force') || $this->option('force-service');
+        $this->optionValidate = $this->option('validate');
+        $this->isForceValidate = $this->option('force') || $this->option('force-validate');
         $this->optionMigration = $this->option('migration');
         $this->optionSeeder = $this->option('seeder');
         $this->optionModelExtendsPivot = $this->option('model-extends-pivot');
@@ -259,6 +287,7 @@ class MakeWithFileCommand extends Command
         $this->optionControllerExtendsCustom = $this->getCommandClass($this->option('controller-extends-custom'));
         $this->optionModelExtendsCustom = $this->getCommandClass($this->option('model-extends-custom'));
         $this->optionServiceExtendsCustom = $this->getCommandClass($this->option('service-extends-custom'));
+        $this->optionValidateExtendsCustom = $this->getCommandClass($this->option('validate-extends-custom'));
     }
 
     /**
@@ -270,12 +299,14 @@ class MakeWithFileCommand extends Command
         $this->addOption('module', 'm', InputOption::VALUE_REQUIRED, 'Module name');
         $this->addOption('force', 'f', InputOption::VALUE_NONE, 'Overwrite existing file');
         $this->addOption('force-controller', null, InputOption::VALUE_NONE, 'Overwrite existing controller file');
-        $this->addOption('force-service', null, InputOption::VALUE_NONE, 'Overwrite existing service file');
         $this->addOption('force-model', null, InputOption::VALUE_NONE, 'Overwrite existing model file');
+        $this->addOption('force-service', null, InputOption::VALUE_NONE, 'Overwrite existing service file');
+        $this->addOption('force-validate', null, InputOption::VALUE_NONE, 'Overwrite existing validate file');
         $this->addOption('suffix', 's', InputOption::VALUE_NONE, sprintf('Add suffix'));
         $this->addOption('controller', null, InputOption::VALUE_NONE, 'Generate the controller file with the same name');
-        $this->addOption('service', null, InputOption::VALUE_NONE, 'Generate the service file with the same name');
         $this->addOption('model', null, InputOption::VALUE_NONE, 'Generate the model file with the same name');
+        $this->addOption('service', null, InputOption::VALUE_NONE, 'Generate the service file with the same name');
+        $this->addOption('validate', null, InputOption::VALUE_NONE, 'Generate the validate file with the same name');
         $this->addOption('migration', null, InputOption::VALUE_NONE, 'Generate the migration file with the same name');
         $this->addOption('seeder', null, InputOption::VALUE_NONE, 'Generate the seeder file with the same name');
         $this->addOption('model-extends-pivot', null, InputOption::VALUE_NONE, 'The model extends Jmhc\Restful\Models\BasePivot');
@@ -283,5 +314,6 @@ class MakeWithFileCommand extends Command
         $this->addOption('controller-extends-custom', null, InputOption::VALUE_REQUIRED, 'The custom controller inherits its parent class', 'Jmhc\Restful\Controllers\BaseController');
         $this->addOption('model-extends-custom', null, InputOption::VALUE_REQUIRED, 'The custom model inherits its parent class', 'Jmhc\Restful\Models\BaseModel');
         $this->addOption('service-extends-custom', null, InputOption::VALUE_REQUIRED, 'The custom service inherits its parent class', 'Jmhc\Restful\Services\BaseService');
+        $this->addOption('validate-extends-custom', null, InputOption::VALUE_REQUIRED, 'The custom validate inherits its parent class', 'Jmhc\Restful\Validates\BaseValidate');
     }
 }

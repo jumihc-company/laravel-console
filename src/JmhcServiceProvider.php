@@ -17,6 +17,7 @@ class JmhcServiceProvider extends ServiceProvider
         MakeControllerCommand::class,
         MakeModelCommand::class,
         MakeServiceCommand::class,
+        MakeValidateCommand::class,
         MakeFactoryCommand::class,
         MakeWithFileCommand::class,
     ];
