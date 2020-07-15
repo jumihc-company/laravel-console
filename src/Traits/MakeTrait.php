@@ -106,7 +106,19 @@ trait MakeTrait
      */
     protected function getCommandClass(string $name)
     {
-        return str_replace('/', '\\', trim($name, '/'));
+        return preg_replace('/\/+/', '\\', trim($name, '/'));
+    }
+
+    /**
+     * 获取类的命名空间
+     * @param string $name
+     * @return string
+     */
+    protected function classNamespace(string $name)
+    {
+        $class = explode('\\', $name);
+        array_pop($class);
+        return implode('\\', $class);
     }
 
     /**

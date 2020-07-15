@@ -70,14 +70,19 @@ class MakeFactoryCommand extends MakeCommand
     protected $optionFactoryExtendsCustom;
 
     /**
-     * 构建操作
+     * 生成前操作
      */
-    protected function buildHandle()
+    protected function buildBeforeHandle()
     {
+        parent::buildBeforeHandle();
+
+        // 命名空间相同重置引入
+        if ($this->classNamespace($this->optionFactoryExtendsCustom) === $this->namespace) {
+            $this->uses = '';
+        }
+
         // 注解内容
         $this->annotation = $this->getAnnotation($this->getScans());
-        file_put_contents($this->saveFilePath, $this->getBuildContent());
-        $this->info($this->saveFilePath . ' create Succeed!');
     }
 
     /**
@@ -149,10 +154,10 @@ class MakeFactoryCommand extends MakeCommand
 
         $str = '/**';
         foreach ($scans as $scan) {
-            $str .= PHP_EOL . sprintf(' * @method static %s %s(bool $refresh = false, array $params = [])', $scan['namespace'], $scan['method']);
+            $str .= "\n" . sprintf(' * @method static %s %s(bool $refresh = false, array $params = [])', $scan['namespace'], $scan['method']);
         }
 
-        return PHP_EOL . $str . PHP_EOL . ' * @package ' . $this->namespace . PHP_EOL . ' */';
+        return "\n" . $str . "\n * @package " . $this->namespace . "\n */";
     }
 
     /**
@@ -186,7 +191,7 @@ class MakeFactoryCommand extends MakeCommand
         $this->optionFactoryExtendsCustom = $this->getCommandClass($this->option('factory-extends-custom'));
 
         // 引入、继承类
-        $this->uses = PHP_EOL . 'use ' . $this->optionFactoryExtendsCustom . ';';
+        $this->uses = "\n\nuse " . $this->optionFactoryExtendsCustom . ';';
         $this->extends = ' extends ' . class_basename($this->optionFactoryExtendsCustom);
     }
 

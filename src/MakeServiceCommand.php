@@ -33,6 +33,19 @@ class MakeServiceCommand extends MakeCommand
     protected $stubPath = __DIR__ . '/stubs/service.stub';
 
     /**
+     * 生成前操作
+     */
+    protected function buildBeforeHandle()
+    {
+        parent::buildBeforeHandle();
+
+        // 命名空间相同重置引入
+        if ($this->classNamespace($this->optionServiceExtendsCustom) === $this->namespace) {
+            $this->uses = '';
+        }
+    }
+
+    /**
      * 设置参数、选项
      */
     protected function setArgumentOption()
@@ -40,7 +53,7 @@ class MakeServiceCommand extends MakeCommand
         parent::setArgumentOption();
 
         // 引入、继承类
-        $this->uses = PHP_EOL . 'use ' . $this->optionServiceExtendsCustom . ';';
+        $this->uses = "\n\nuse " . $this->optionServiceExtendsCustom . ';';
         $this->extends = ' extends ' . class_basename($this->optionServiceExtendsCustom);
     }
 

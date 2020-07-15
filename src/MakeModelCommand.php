@@ -147,6 +147,9 @@ class MakeModelCommand extends MakeCommand
             return false;
         }
 
+        // 生成前操作
+        $this->buildBeforeHandle();
+
         // 生成操作
         $this->buildHandle();
 
@@ -154,6 +157,19 @@ class MakeModelCommand extends MakeCommand
         $this->extraCommands();
 
         return true;
+    }
+
+    /**
+     * 生成前操作
+     */
+    protected function buildBeforeHandle()
+    {
+        parent::buildBeforeHandle();
+
+        // 命名空间相同重置引入
+        if ($this->classNamespace($this->optionModelExtendsCustom) === $this->namespace) {
+            $this->uses = '';
+        }
     }
 
     /**
@@ -208,7 +224,7 @@ class MakeModelCommand extends MakeCommand
             $_dataType = $this->formatDataType($column['data_type']);
 
             // 注释
-            $annotation .= PHP_EOL . sprintf(' * @property %s $%s', $this->formatPropertyType($_dataType), $column['column_name']);
+            $annotation .= "\n" . sprintf(' * @property %s $%s', $this->formatPropertyType($_dataType), $column['column_name']);
 
             // 批量赋值字段
             $fillable .= sprintf("'%s', ", $column['column_name']);
@@ -247,7 +263,7 @@ class MakeModelCommand extends MakeCommand
             return '';
         }
 
-        return PHP_EOL . '/**' . $annotation . PHP_EOL . ' * @package ' . $this->namespace . PHP_EOL . ' */';
+        return "\n/**" . $annotation . "\n * @package " . $this->namespace . "\n */";
     }
 
     /**
@@ -318,12 +334,12 @@ class MakeModelCommand extends MakeCommand
         }, $this->option('table'));
 
         // 引入、继承类
-        $this->uses = PHP_EOL . 'use ' . $this->optionModelExtendsCustom . ';';
+        $this->uses = "\n\nuse " . $this->optionModelExtendsCustom . ';';
         $this->extends = ' extends ' . class_basename($this->optionModelExtendsCustom);
 
         if ($this->optionModelExtendsPivot) {
             // 继承中间模型
-            $this->uses = PHP_EOL . 'use Jmhc\Restful\Models\BasePivot;';
+            $this->uses = "\n\nuse Jmhc\Restful\Models\BasePivot;";
             $this->extends = ' extends BasePivot';
         }
     }

@@ -200,6 +200,9 @@ abstract class MakeCommand extends Command
             return false;
         }
 
+        // 生成前操作
+        $this->buildBeforeHandle();
+
         // 生成操作
         $this->buildHandle();
 
@@ -236,6 +239,12 @@ abstract class MakeCommand extends Command
 
         return $dir;
     }
+
+    /**
+     * 生成前操作
+     */
+    protected function buildBeforeHandle()
+    {}
 
     /**
      * 生成操作
