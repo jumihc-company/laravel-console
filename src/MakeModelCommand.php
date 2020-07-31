@@ -178,7 +178,7 @@ class MakeModelCommand extends MakeCommand
      */
     protected function getBuildContent()
     {
-        $table = Str::plural(Str::snake($this->table));
+        $table = Str::snake($this->table);
         [$annotation, $fillable, $dates, $casts] = $this->getReplaceData($this->dbHelper->getAllColumns($table));
 
         // 存在按节点替换
