@@ -9,8 +9,8 @@ namespace Jmhc\Console;
 use Illuminate\Console\Command;
 use Illuminate\Support\Str;
 use InvalidArgumentException;
+use Jmhc\Console\Traits\ConfigureDefaultTrait;
 use Jmhc\Console\Traits\MakeTrait;
-use Jmhc\Support\Utils\ContainerHelper;
 use Symfony\Component\Console\Input\InputOption;
 
 /**
@@ -20,6 +20,7 @@ use Symfony\Component\Console\Input\InputOption;
 class MakeWithFileCommand extends Command
 {
     use MakeTrait;
+    use ConfigureDefaultTrait;
 
     /**
      * 命令名称
@@ -34,22 +35,10 @@ class MakeWithFileCommand extends Command
     protected $description = 'Generate some file with file';
 
     /**
-     * 默认保存路径
-     * @var string
-     */
-    protected $defaultDir = 'Http/';
-
-    /**
      * 选项 dir
      * @var string
      */
     protected $optionDir;
-
-    /**
-     * 选项 module
-     * @var string
-     */
-    protected $optionModule;
 
     /**
      * 选项 suffix
@@ -159,12 +148,13 @@ class MakeWithFileCommand extends Command
         $this->setArgumentOption();
 
         // 读取生成文件配置
-        $tables = ContainerHelper::config('jmhc-build-file', []);
+        $tables = config('jmhc-console.tables', []);
 
         // 数据表不存在
         if (empty($tables)) {
             // 运行完成
             $this->runComplete();
+            return;
         }
 
         // 过滤名称
@@ -187,7 +177,7 @@ class MakeWithFileCommand extends Command
     protected function filterTables(array $tables)
     {
         // 数据表前缀
-        $prefix = ContainerHelper::app('db.connection')->getConfig('prefix');
+        $prefix = app('db.connection')->getConfig('prefix');
 
         return array_values(array_filter(array_unique(array_map(function ($table) use ($prefix) {
             return str_replace($prefix, '', $table);
@@ -203,7 +193,6 @@ class MakeWithFileCommand extends Command
         // 命令参数
         $arguments = [
             'name' => $name,
-            '--module' => $this->optionModule,
             '--suffix' => $this->optionSuffix,
             '--model-extends-pivot' => $this->optionModelExtendsPivot,
             '--model-casts-force' => $this->optionModelCastsForce,
@@ -270,7 +259,6 @@ class MakeWithFileCommand extends Command
     protected function setArgumentOption()
     {
         $this->optionDir = $this->filterOptionDir($this->option('dir'));
-        $this->optionModule = $this->option('module') ?? '';
         $this->optionSuffix = $this->option('suffix');
         $this->optionController = $this->option('controller');
         $this->isForceController = $this->option('force') || $this->option('force-controller');
@@ -295,8 +283,7 @@ class MakeWithFileCommand extends Command
      */
     protected function configure()
     {
-        $this->addOption('dir', null, InputOption::VALUE_REQUIRED, 'File saving path, relative to app directory', $this->defaultDir);
-        $this->addOption('module', 'm', InputOption::VALUE_REQUIRED, 'Module name');
+        $this->addOption('dir', null, InputOption::VALUE_REQUIRED, 'File saving path, relative to app directory', $this->makeWithFileOptionDirDefault());
         $this->addOption('force', 'f', InputOption::VALUE_NONE, 'Overwrite existing file');
         $this->addOption('force-controller', null, InputOption::VALUE_NONE, 'Overwrite existing controller file');
         $this->addOption('force-model', null, InputOption::VALUE_NONE, 'Overwrite existing model file');
@@ -310,10 +297,9 @@ class MakeWithFileCommand extends Command
         $this->addOption('migration', null, InputOption::VALUE_NONE, 'Generate the migration file with the same name');
         $this->addOption('seeder', null, InputOption::VALUE_NONE, 'Generate the seeder file with the same name');
         $this->addOption('model-extends-pivot', null, InputOption::VALUE_NONE, 'The model extends Jmhc\Restful\Models\BasePivot');
-        $this->addOption('model-extends-mongo', null, InputOption::VALUE_NONE, 'The model extends Jmhc\Restful\Models\BaseMongo');
-        $this->addOption('controller-extends-custom', null, InputOption::VALUE_REQUIRED, 'The custom controller inherits its parent class', 'Jmhc\Restful\Controllers\BaseController');
-        $this->addOption('model-extends-custom', null, InputOption::VALUE_REQUIRED, 'The custom model inherits its parent class', 'Jmhc\Restful\Models\BaseModel');
-        $this->addOption('service-extends-custom', null, InputOption::VALUE_REQUIRED, 'The custom service inherits its parent class', 'Jmhc\Restful\Services\BaseService');
-        $this->addOption('validate-extends-custom', null, InputOption::VALUE_REQUIRED, 'The custom validate inherits its parent class', 'Jmhc\Restful\Validates\BaseValidate');
+        $this->addOption('controller-extends-custom', null, InputOption::VALUE_REQUIRED, 'The custom controller inherits its parent class', $this->optionControllerExtendsCustomDefault());
+        $this->addOption('model-extends-custom', null, InputOption::VALUE_REQUIRED, 'The custom model inherits its parent class', $this->optionModelExtendsCustomDefault());
+        $this->addOption('service-extends-custom', null, InputOption::VALUE_REQUIRED, 'The custom service inherits its parent class', $this->optionServiceExtendsCustomDefault());
+        $this->addOption('validate-extends-custom', null, InputOption::VALUE_REQUIRED, 'The custom validate inherits its parent class', $this->optionValidateExtendsCustomDefault());
     }
 }

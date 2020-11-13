@@ -29,19 +29,6 @@ class MakeValidateCommand extends MakeCommand
     protected $stubPath = __DIR__ . '/stubs/validate.stub';
 
     /**
-     * 生成前操作
-     */
-    protected function buildBeforeHandle()
-    {
-        parent::buildBeforeHandle();
-
-        // 命名空间相同重置引入
-        if ($this->classNamespace($this->optionValidateExtendsCustom) === $this->namespace) {
-            $this->uses = '';
-        }
-    }
-
-    /**
      * 设置参数、选项
      */
     protected function setArgumentOption()

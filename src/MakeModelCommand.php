@@ -9,7 +9,7 @@ namespace Jmhc\Console;
 use Illuminate\Support\Str;
 use Jmhc\Console\Ast\ModelUpdateVisitor;
 use Jmhc\Console\Traits\ReplaceModelTrait;
-use Jmhc\Support\Utils\DbHelper;
+use Jmhc\Support\Helper\DBHelper;
 use PhpParser\NodeTraverser;
 use PhpParser\ParserFactory;
 use PhpParser\PrettyPrinter\Standard;
@@ -74,7 +74,7 @@ class MakeModelCommand extends MakeCommand
 
     /**
      * 数据库辅助类
-     * @var DbHelper
+     * @var DBHelper
      */
     protected $dbHelper;
 
@@ -94,7 +94,7 @@ class MakeModelCommand extends MakeCommand
     {
         parent::__construct();
 
-        $this->dbHelper = DbHelper::getInstance([
+        $this->dbHelper = DBHelper::getInstance([
             'name' => $this->optionConnection,
         ]);
         $this->prefix = $this->dbHelper->getPrefix();
@@ -157,19 +157,6 @@ class MakeModelCommand extends MakeCommand
         $this->extraCommands();
 
         return true;
-    }
-
-    /**
-     * 生成前操作
-     */
-    protected function buildBeforeHandle()
-    {
-        parent::buildBeforeHandle();
-
-        // 命名空间相同重置引入
-        if ($this->classNamespace($this->optionModelExtendsCustom) === $this->namespace) {
-            $this->uses = '';
-        }
     }
 
     /**
@@ -333,15 +320,14 @@ class MakeModelCommand extends MakeCommand
             return str_replace($this->prefix, '', $v);
         }, $this->option('table'));
 
+        // 继承中间模型
+        if ($this->optionModelExtendsPivot) {
+            $this->optionModelExtendsCustom = 'Jmhc\Restful\Models\BasePivot';
+        }
+
         // 引入、继承类
         $this->uses = "\n\nuse " . $this->optionModelExtendsCustom . ';';
         $this->extends = ' extends ' . class_basename($this->optionModelExtendsCustom);
-
-        if ($this->optionModelExtendsPivot) {
-            // 继承中间模型
-            $this->uses = "\n\nuse Jmhc\Restful\Models\BasePivot;";
-            $this->extends = ' extends BasePivot';
-        }
     }
 
     /**

@@ -7,6 +7,7 @@
 namespace Jmhc\Console\Traits;
 
 use Illuminate\Support\Str;
+use InvalidArgumentException;
 
 /**
  * 创建命令辅助
@@ -127,5 +128,24 @@ trait MakeTrait
     protected function runComplete()
     {
         $this->info(sprintf('Command %s run completed!', $this->name));
+    }
+
+    /**
+     * 运行失败
+     * @param string $msg
+     */
+    protected function runFail(string $msg)
+    {
+        $this->error(sprintf('Command %s run fail: %s', $this->name, $msg));
+    }
+
+    /**
+     * 抛出异常
+     * @param string $msg
+     * @throws InvalidArgumentException
+     */
+    protected function throwThrowable(string $msg)
+    {
+        throw new InvalidArgumentException($msg);
     }
 }
