@@ -11,6 +11,10 @@
 
 ## 使用说明
 
+> 安装后可直接配置环境变量使用
+> 
+> 环境变量值参考：[env](docs/ENV.md)
+
 使用以下命令安装：
 ```
 composer require jmhc/laravel-console
