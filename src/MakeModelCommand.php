@@ -217,7 +217,7 @@ class MakeModelCommand extends MakeCommand
             $fillable .= sprintf("'%s', ", $column['column_name']);
 
             // 时间字段
-            if (! in_array($column['column_name'], ['created_at', 'updated_at']) && in_array($_dataType, ['date', 'datetime', 'timestamp', 'time'])) {
+            if (! in_array($column['column_name'], ['created_at', 'updated_at']) && in_array($_dataType, ['datetime', 'timestamp', 'time'])) {
                 $dates .= sprintf("'%s', ", $column['column_name']);
             }
 
