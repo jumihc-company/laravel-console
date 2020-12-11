@@ -9,15 +9,18 @@ namespace Jmhc\Console;
 use Illuminate\Console\Command;
 use Illuminate\Support\Str;
 use InvalidArgumentException;
+use Jmhc\Console\Traits\ConfigureDefaultTrait;
 use Jmhc\Console\Traits\MakeTrait;
 use Jmhc\Console\Traits\ReplaceTrait;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputOption;
+use Throwable;
 
 abstract class MakeCommand extends Command
 {
     use MakeTrait;
     use ReplaceTrait;
+    use ConfigureDefaultTrait;
 
     /**
      * 命令描述
@@ -98,12 +101,6 @@ abstract class MakeCommand extends Command
     protected $optionDir;
 
     /**
-     * 选项 module
-     * @var string
-     */
-    protected $optionModule;
-
-    /**
      * 选项 force
      * @var bool
      */
@@ -159,6 +156,10 @@ abstract class MakeCommand extends Command
             strtolower($this->entityName)
         );
 
+        // 设置默认路径
+        $method = sprintf('make%sOptionDirDefault', $this->entityName);
+        $this->defaultDir = call_user_func([$this, $method]);
+
         parent::__construct();
     }
 
@@ -177,11 +178,15 @@ abstract class MakeCommand extends Command
         // 创建文件夹
         $this->createDir($this->dir);
 
-        // 运行
-        $this->mainHandle();
+        try {
+            // 运行
+            $this->mainHandle();
 
-        // 运行完成
-        $this->runComplete();
+            // 运行完成
+            $this->runComplete();
+        } catch (Throwable $e) {
+            $this->runFail($e->getMessage());
+        }
     }
 
     /**
@@ -218,23 +223,10 @@ abstract class MakeCommand extends Command
      */
     protected function getSaveDir()
     {
-        // 路径
-        $dir = $this->defaultDir;
-        if ($this->optionDir) {
-            $dir = $this->filterOptionDir($this->optionDir);
-            // 路径不存在实体后缀
-            if (! preg_match(sprintf('/[(%ss\/)(%s)]$/i', $this->entityName, $this->entityName), $dir)) {
-                $dir .= $this->entityName . 's/';
-            }
-        }
-
-        // 模块存在
-        if ($this->optionModule) {
-            $dir = preg_replace(
-                    sprintf('/%ss\/$/i', $this->entityName),
-                    '',
-                    $this->optionDir
-                ) . $this->filterStr($this->optionModule) . '/' . $this->entityName . 's/';
+        $dir = $this->filterOptionDir($this->optionDir);
+        // 路径不存在实体后缀
+        if (! preg_match(sprintf('/[(%ss\/)(%s)]$/i', $this->entityName, $this->entityName), $dir)) {
+            $dir .= $this->entityName . 's/';
         }
 
         return $dir;
@@ -244,7 +236,34 @@ abstract class MakeCommand extends Command
      * 生成前操作
      */
     protected function buildBeforeHandle()
-    {}
+    {
+        // 自定义参数是否存在
+        $prop = sprintf('option%sExtendsCustom', $this->entityName);
+        if (! property_exists($this, $prop)) {
+            return;
+        }
+
+        // 是否名称相同
+        $isNameSame = $this->class == class_basename($this->{$prop});
+        // 是否命名空间相同
+        $isNamespaceSame = $this->classNamespace($this->{$prop}) === $this->namespace;
+
+        // 名称和命名空间相同
+        if ($isNameSame && $isNamespaceSame) {
+            $this->throwThrowable('Cannot inherit oneself.');
+        }
+
+        // 名称相同
+        if ($isNameSame) {
+            $this->uses = '';
+            $this->extends = ' extends \\' . $this->{$prop};
+        }
+
+        // 命名空间相同
+        if ($isNamespaceSame) {
+            $this->uses = '';
+        }
+    }
 
     /**
      * 生成操作
@@ -298,7 +317,6 @@ abstract class MakeCommand extends Command
         // 命令参数
         $arguments = [
             'name' => $name,
-            '--module' => $this->optionModule,
             '--force' => $this->optionForce,
             '--suffix' => $this->optionSuffix,
             '--model-extends-pivot' => $this->optionModelExtendsPivot,
@@ -310,9 +328,6 @@ abstract class MakeCommand extends Command
         ];
         // 保存路径
         $saveDir = $this->getSaveDir();
-        if ($this->optionModule) {
-            $saveDir = str_replace($this->optionModule . '/', '', $this->getSaveDir());
-        }
         // 路径格式
         $dirFormat = str_replace(
             $this->entityName,
@@ -381,7 +396,6 @@ abstract class MakeCommand extends Command
 
         // 命令选项
         $this->optionDir = $this->filterOptionDir($this->option('dir'));
-        $this->optionModule = ucfirst($this->option('module'));
         $this->optionForce = $this->option('force');
         $this->optionSuffix = $this->option('suffix');
         $this->optionModelExtendsPivot = $this->option('model-extends-pivot');
@@ -399,17 +413,16 @@ abstract class MakeCommand extends Command
     {
         $this->addArgument('name', $this->argumentNameMode, $this->entityName . ' name');
 
-        $this->addOption('dir', null, InputOption::VALUE_REQUIRED, 'File saving path, relative to app directory', $this->defaultDir . $this->entityName . 's/');
-        $this->addOption('module', 'm', InputOption::VALUE_REQUIRED, 'Module name');
+        $this->addOption('dir', null, InputOption::VALUE_REQUIRED, 'File saving path, relative to app directory', $this->defaultDir);
         $this->addOption('force', 'f', InputOption::VALUE_NONE, 'Overwrite existing file');
         $this->addOption('suffix', 's', InputOption::VALUE_NONE, sprintf('Add the `%s` suffix', $this->entityName));
         $this->addOption('migration', null, InputOption::VALUE_NONE, 'Generate the migration file with the same name');
         $this->addOption('seeder', null, InputOption::VALUE_NONE, 'Generate the seeder file with the same name');
         $this->addOption('model-extends-pivot', null, InputOption::VALUE_NONE, 'The model extends Jmhc\Restful\Models\BasePivot');
         $this->addOption('model-casts-force', null, InputOption::VALUE_NONE, 'Whether to override the casts attribute');
-        $this->addOption('controller-extends-custom', null, InputOption::VALUE_REQUIRED, 'The custom controller inherits its parent class', 'Jmhc\Restful\Controllers\BaseController');
-        $this->addOption('model-extends-custom', null, InputOption::VALUE_REQUIRED, 'The custom model inherits its parent class', 'Jmhc\Restful\Models\BaseModel');
-        $this->addOption('service-extends-custom', null, InputOption::VALUE_REQUIRED, 'The custom service inherits its parent class', 'Jmhc\Restful\Services\BaseService');
-        $this->addOption('validate-extends-custom', null, InputOption::VALUE_REQUIRED, 'The custom validate inherits its parent class', 'Jmhc\Restful\Validates\BaseValidate');
+        $this->addOption('controller-extends-custom', null, InputOption::VALUE_REQUIRED, 'The custom controller inherits its parent class', $this->optionControllerExtendsCustomDefault());
+        $this->addOption('model-extends-custom', null, InputOption::VALUE_REQUIRED, 'The custom model inherits its parent class', $this->optionModelExtendsCustomDefault());
+        $this->addOption('service-extends-custom', null, InputOption::VALUE_REQUIRED, 'The custom service inherits its parent class', $this->optionServiceExtendsCustomDefault());
+        $this->addOption('validate-extends-custom', null, InputOption::VALUE_REQUIRED, 'The custom validate inherits its parent class', $this->optionValidateExtendsCustomDefault());
     }
 }

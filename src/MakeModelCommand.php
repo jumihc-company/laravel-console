@@ -160,19 +160,6 @@ class MakeModelCommand extends MakeCommand
     }
 
     /**
-     * 生成前操作
-     */
-    protected function buildBeforeHandle()
-    {
-        parent::buildBeforeHandle();
-
-        // 命名空间相同重置引入
-        if ($this->classNamespace($this->optionModelExtendsCustom) === $this->namespace) {
-            $this->uses = '';
-        }
-    }
-
-    /**
      * 获取生成内容
      * @return string
      */
@@ -230,7 +217,7 @@ class MakeModelCommand extends MakeCommand
             $fillable .= sprintf("'%s', ", $column['column_name']);
 
             // 时间字段
-            if (! in_array($column['column_name'], ['created_at', 'updated_at']) && in_array($_dataType, ['date', 'datetime', 'timestamp', 'time'])) {
+            if (! in_array($column['column_name'], ['created_at', 'updated_at']) && in_array($_dataType, ['datetime', 'timestamp', 'time'])) {
                 $dates .= sprintf("'%s', ", $column['column_name']);
             }
 
@@ -288,7 +275,6 @@ class MakeModelCommand extends MakeCommand
             case 'bool':
             case 'boolean':
                 return 'boolean';
-            case 'date':
             case 'datetime':
             case 'timestamp':
             case 'time':
@@ -309,7 +295,6 @@ class MakeModelCommand extends MakeCommand
         switch ($type) {
             case 'integer':
                 return 'int';
-            case 'date':
             case 'datetime':
             case 'timestamp':
             case 'time':
@@ -333,15 +318,14 @@ class MakeModelCommand extends MakeCommand
             return str_replace($this->prefix, '', $v);
         }, $this->option('table'));
 
+        // 继承中间模型
+        if ($this->optionModelExtendsPivot) {
+            $this->optionModelExtendsCustom = 'Jmhc\Restful\Models\BasePivot';
+        }
+
         // 引入、继承类
         $this->uses = "\n\nuse " . $this->optionModelExtendsCustom . ';';
         $this->extends = ' extends ' . class_basename($this->optionModelExtendsCustom);
-
-        if ($this->optionModelExtendsPivot) {
-            // 继承中间模型
-            $this->uses = "\n\nuse Jmhc\Restful\Models\BasePivot;";
-            $this->extends = ' extends BasePivot';
-        }
     }
 
     /**

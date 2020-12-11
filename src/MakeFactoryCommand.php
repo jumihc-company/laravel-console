@@ -28,12 +28,6 @@ class MakeFactoryCommand extends MakeCommand
     protected $description = 'Generate the factory file';
 
     /**
-     * 默认保存路径
-     * @var string
-     */
-    protected $defaultDir = 'Common/Factory/';
-
-    /**
      * 实体名称
      * @var string
      */
@@ -75,11 +69,6 @@ class MakeFactoryCommand extends MakeCommand
     protected function buildBeforeHandle()
     {
         parent::buildBeforeHandle();
-
-        // 命名空间相同重置引入
-        if ($this->classNamespace($this->optionFactoryExtendsCustom) === $this->namespace) {
-            $this->uses = '';
-        }
 
         // 注解内容
         $this->annotation = $this->getAnnotation($this->getScans());
@@ -166,10 +155,6 @@ class MakeFactoryCommand extends MakeCommand
      */
     protected function getSaveDir()
     {
-        if (! $this->optionDir) {
-            return $this->defaultDir;
-        }
-
         return $this->filterOptionDir($this->optionDir);
     }
 
@@ -203,9 +188,9 @@ class MakeFactoryCommand extends MakeCommand
         $this->addArgument('name', InputArgument::REQUIRED, $this->entityName . ' name');
 
         $this->addOption('scan-dir', null, InputOption::VALUE_IS_ARRAY | InputOption::VALUE_REQUIRED, 'File scanning path, relative to app directory');
-        $this->addOption('dir', null, InputOption::VALUE_REQUIRED, 'File saving path, relative to app directory', $this->defaultDir);
+        $this->addOption('dir', null, InputOption::VALUE_REQUIRED, 'File saving path, relative to app directory', $this->makeFactoryOptionDirDefault());
         $this->addOption('force', 'f', InputOption::VALUE_NONE, 'Overwrite existing files');
         $this->addOption('suffix', 's', InputOption::VALUE_NONE, sprintf('Add the `%s` suffix', $this->entityName));
-        $this->addOption('factory-extends-custom', null, InputOption::VALUE_REQUIRED, 'The custom factory inherits its parent class', 'Jmhc\Restful\Factory\BaseFactory');
+        $this->addOption('factory-extends-custom', null, InputOption::VALUE_REQUIRED, 'The custom factory inherits its parent class', $this->optionFactoryExtendsCustomDefault());
     }
 }

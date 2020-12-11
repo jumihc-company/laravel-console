@@ -11,6 +11,10 @@
 
 ## 使用说明
 
+> 安装后可直接配置环境变量使用
+>
+> 环境变量值参考：[env](docs/ENV.md)
+
 使用以下命令安装：
 ```
 composer require jmhc/laravel-console
@@ -33,8 +37,6 @@ php artisan jmhc-api:make-controller test
 php artisan jmhc-api:make-controller test --controller-extends-custom App/BaseController
 // 创建 Test 控制器并添加后缀，位于 app/Http/Controllers/TestController.php
 php artisan jmhc-api:make-controller test -s
-// 创建 Test 控制器位于 app/Http/Index/Controllers/Test.php
-php artisan jmhc-api:make-controller test -m index
 ...
 ```
 
@@ -53,10 +55,8 @@ php artisan jmhc-api:make-model --dir Common/Models -t test -t foos
 php artisan jmhc-api:make-model test
 // 创建 Test 模型修改继承父类
 php artisan jmhc-api:make-model test --model-extends-custom App\BaseModel
-// 创建 Test 服务并添加后缀，位于 app/Http/Models/TestModel.php
+// 创建 Test 模型并添加后缀，位于 app/Http/Models/TestModel.php
 php artisan jmhc-api:make-model test -s
-// 创建 Test 模型位于 app/Http/Index/Models/Test.php
-php artisan jmhc-api:make-model test -m index
 ...
 ```
 
@@ -73,8 +73,6 @@ php artisan jmhc-api:make-service test
 php artisan jmhc-api:make-service test --service-extends-custom App\BaseService
 // 创建 Test 服务并添加后缀，位于 app/Http/Services/TestService.php
 php artisan jmhc-api:make-service test -s
-// 创建 Test 服务位于 app/Http/Index/Services/Test.php
-php artisan jmhc-api:make-service test -m index
 ...
 ```
 
@@ -91,14 +89,12 @@ php artisan jmhc-api:make-validate test
 php artisan jmhc-api:make-validate test --validate-extends-custom App/BaseValidate
 // 创建 Test 验证器并添加后缀，位于 app/Http/Validates/TestValidate.php
 php artisan jmhc-api:make-validate test -s
-// 创建 Test 验证器位于 app/Http/Index/Validates/Test.php
-php artisan jmhc-api:make-validate test -m index
 ...
 ```
 
 ### 通过文件创建所需文件
 
-> 此命令通过 `config('jmhc-build-file')` 获取需要创建的文件名称
+> 此命令通过 `config('jmhc-console.tables')` 获取需要创建的文件名称
 >
 > 使用 `*-extends-custom` 修改对应继承父类
 

@@ -25,11 +25,11 @@ class JmhcServiceProvider extends ServiceProvider
     /**
      * @var string
      */
-    protected $buildFileConfigPath;
+    protected $consoleConfigPath;
 
     public function boot()
     {
-        $this->buildFileConfigPath = __DIR__ . '/../config/jmhc-build-file.php';
+        $this->consoleConfigPath = __DIR__ . '/../config/jmhc-console.php';
 
         // 注册命令
         $this->commands($this->commands);
@@ -46,10 +46,10 @@ class JmhcServiceProvider extends ServiceProvider
      */
     protected function mergeConfig()
     {
-        // 合并 build-file 配置
+        // 合并 console 配置
         $this->mergeConfigFrom(
-            $this->buildFileConfigPath,
-            'jmhc-build-file'
+            $this->consoleConfigPath,
+            'jmhc-console'
         );
     }
 
@@ -60,7 +60,7 @@ class JmhcServiceProvider extends ServiceProvider
     {
         // 发布配置文件
         $this->publishes([
-            $this->buildFileConfigPath => config_path('jmhc-build-file.php'),
+            $this->consoleConfigPath => config_path('jmhc-console.php'),
         ], 'jmhc-console');
     }
 }
