@@ -275,7 +275,6 @@ class MakeModelCommand extends MakeCommand
             case 'bool':
             case 'boolean':
                 return 'boolean';
-            case 'date':
             case 'datetime':
             case 'timestamp':
             case 'time':
@@ -296,7 +295,6 @@ class MakeModelCommand extends MakeCommand
         switch ($type) {
             case 'integer':
                 return 'int';
-            case 'date':
             case 'datetime':
             case 'timestamp':
             case 'time':
